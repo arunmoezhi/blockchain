@@ -11,14 +11,14 @@ class BlockChain
     {
         blockChain.add(block);
     }
-    
+
     BlockChain()
     {
         blockChain = new LinkedList<>();
-        Block genesisBlock = new Block("0000000000000000000000000000000000000000000000000000000000000000", "", "genesis block", System.nanoTime());
+        Block genesisBlock = new Block("0000000000000000000000000000000000000000000000000000000000000000", "0000000000000000000000000000000000000000000000000000000000000000", "genesis block", System.nanoTime(), 0);
         blockChain.add(genesisBlock);
     }
-    
+
     String computeHash(String previousHash, String data, int nonce)
     {
         try
@@ -52,15 +52,35 @@ class BlockChain
         SecureRandom sRandom = new SecureRandom();
         int nonce = sRandom.nextInt(); 
         String currentHash = computeHash(previousHash, data, nonce);
-        return new Block(currentHash, previousHash, data, System.nanoTime());
+        return new Block(currentHash, previousHash, data, System.nanoTime(), nonce);
     }
 
     void printBlockChain()
     {
+        System.out.format("%10s%70s%70s%15s%15s%15s\n", "Block #", "hash", "previousHash", "data", "timeStamp", "nonce");
         for(int i=0;i<blockChain.size();i++)
         {
             Block b = blockChain.get(i);
-            System.out.println("Block #" + i + "\t" + b.hash + "\t" + b.previousHash + "\t" + b.data + "\t" + b.timeStamp);
+            System.out.format("%10d%70s%70s%15s%15d%15d\n", i, b.hash, b.previousHash, b.data, b.timeStamp, b.nonce);
         }
+    }
+
+    boolean verifyBlock(Block b)
+    {
+        return b.hash.equals(computeHash(b.previousHash, b.data, b.nonce));
+    }
+
+    boolean verifyBlockChain()
+    {
+        for(int i=1;i<blockChain.size();i++)
+        {
+            if(!verifyBlock(blockChain.get(i)))
+            {
+                System.out.println("Block #" + i + " is invalid");
+                return false;
+            }
+        }
+        System.out.println("Block chain is valid");
+        return true;
     }
 }

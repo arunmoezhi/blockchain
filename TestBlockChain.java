@@ -11,5 +11,6 @@ class TestBlockChain
             bc.addBlock(b);
         }
         bc.printBlockChain();
+        bc.verifyBlockChain();
     }
 }
