@@ -2,10 +2,12 @@ import java.util.List;
 import java.util.LinkedList;
 import java.security.SecureRandom;
 import java.security.MessageDigest;
+import java.util.regex.*;
 
 class BlockChain
 {
     List<Block> blockChain;
+    int difficulty;
 
     void addBlock(Block block)
     {
@@ -17,6 +19,7 @@ class BlockChain
         blockChain = new LinkedList<>();
         Block genesisBlock = new Block("0000000000000000000000000000000000000000000000000000000000000000", "0000000000000000000000000000000000000000000000000000000000000000", "genesis block", System.nanoTime(), 0);
         blockChain.add(genesisBlock);
+        difficulty = 5;
     }
 
     String computeHash(String previousHash, String data, int nonce)
@@ -51,8 +54,16 @@ class BlockChain
         String previousHash = blockChain.get(blockLength-1).hash;
         SecureRandom sRandom = new SecureRandom();
         int nonce = sRandom.nextInt(); 
-        String currentHash = computeHash(previousHash, data, nonce);
-        return new Block(currentHash, previousHash, data, System.nanoTime(), nonce);
+        Pattern pattern = Pattern.compile("\\b0{" + difficulty +",}.*");
+        while(true)
+        {
+          String currentHash = computeHash(previousHash, data, nonce);
+          if(pattern.matcher(currentHash).matches())
+          {
+            return new Block(currentHash, previousHash, data, System.nanoTime(), nonce);
+          }
+          nonce++;
+        }
     }
 
     void printBlockChain()
